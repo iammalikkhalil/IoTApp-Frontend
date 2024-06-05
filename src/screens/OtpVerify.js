@@ -27,7 +27,7 @@ export default function OtpVerify(props) {
         text1: response.data.message,
       });
       setTimeout(() => {
-        props.navigation.replace('Dashboard')
+        props.navigation.replace('Dashboard', response.data.data)
       }, 1500)
     } catch (error) {
       console.log(error.response.data.message || error.response.data.error || error.response || error);

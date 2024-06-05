@@ -6,17 +6,48 @@ import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { resumeDownload } from 'react-native-fs';
 
+import DrawerModel from '../models/DrawerModel';
 
-export default function Dashboard() {
+export default function Dashboard(props) {
+  const [name, setName] = useState(props.route.params.name);
+  const [request, setRequest] = useState({});
+  console.log(request);
+  const [bell, setBell] = useState(false);
+  const [modelVisible, setModelVisible] = useState(false);
+
   const navigation = useNavigation();
   useEffect(() => {
-    socketServcies.on('mqttRes', msg => {
-      console.log('socket io response: ', msg);
-      isTrue = msg == 'true';
-      setValue(isTrue);
+    let timeoutId;
+
+    socketServcies.on('WSUserRequest', msg => {
+      const newRequest = JSON.parse(msg);
+      setRequest(newRequest);
+      setBell(true);
+
+      // socketServcies.emit('WSAdminResponse', "hello");
+      // console.log("message sended!");
+
+      // Set a timer to reset `bell` to false after 1 minute
+      if (timeoutId) {
+        clearTimeout(timeoutId); // Clear existing timer
+      }
+      timeoutId = setTimeout(() => {
+        setBell(false);
+      }, 60000); // 1 minute in milliseconds
     });
+
+    // Cleanup function to clear timer on component unmount
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
+
+
 
   return (
     <LinearGradient
@@ -25,28 +56,35 @@ export default function Dashboard() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       locations={[0, 0.09, 1]}
-
     >
-      {/* <Switch
-        style={styles.switch}
-        color="#2089dc"
-        value={value}
-        onValueChange={value => DoorHandler(value)}
-      /> */}
 
 
+      {modelVisible ? <DrawerModel props={{ setModelVisible, navigation }} /> : null}
 
-      <TouchableOpacity style={styles.iconContainer} onPress={()=>{
-        navigation.navigate('Details');
-      }}>
-        <View style={styles.btnContainer}>
-          <Image style={styles.btnIcon} source={require('../assets/images/notification.png')} />
-        </View>
-      </TouchableOpacity>
 
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => {
+          setModelVisible(true)
+        }}>
+          <View style={styles.btnContainer}>
+            <Image style={styles.btnIcon} source={require('../assets/images/menu.png')} />
+          </View>
+        </TouchableOpacity>
+        {
+          bell ?
+            <TouchableOpacity style={styles.iconContainer} onPress={() => {
+              setBell(false);
+              navigation.navigate('Details', { request, admin: props.route.params._id, dashboard: props.route.params });
+            }}>
+              <View style={styles.btnContainer}>
+                <Image style={styles.btnIcon} source={require('../assets/images/bellcheck.png')} />
+              </View>
+            </TouchableOpacity>
+            : null}
+      </View>
       <View style={styles.headingContainer}>
         <Text style={styles.wellcomeText}>Wellcome</Text>
-        <Text style={styles.nameText}>Malik,</Text>
+        <Text style={styles.nameText}>{name},</Text>
       </View>
 
       <View style={styles.doorContainer}>
@@ -74,8 +112,8 @@ export default function Dashboard() {
                 <Image style={[styles.btnIcon]} source={require('../assets/images/open-lock.png')} />
               </TouchableOpacity>
 
-                <Image style={{width: 40, height: 40}} source={require('../assets/images/forward.png')} />
-                <Image style={{width: 40, height: 40}} source={require('../assets/images/close-lock.png')} />
+              <Image style={{ width: 40, height: 40 }} source={require('../assets/images/forward.png')} />
+              <Image style={{ width: 40, height: 40 }} source={require('../assets/images/close-lock.png')} />
 
             </View>
           </View>
@@ -100,7 +138,6 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   iconContainer: {
-    width: '100%',
     flexDirection: "row",
     justifyContent: "flex-end",
     paddingHorizontal: "5%",
@@ -194,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 40,
     flexDirection: "row",
-    backgroundColor:"rgba(185,190,186, 0.8)",
+    backgroundColor: "rgba(185,190,186, 0.8)",
     borderRadius: 40,
     paddingVertical: 11,
   },

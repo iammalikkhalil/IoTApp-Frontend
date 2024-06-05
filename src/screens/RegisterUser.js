@@ -21,7 +21,7 @@ import Toast from 'react-native-toast-message';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import RNFS from 'react-native-fs';
 
-export default function RegisterUser({ navigation }) {
+export default function RegisterUser(props, { navigation }) {
   const [name, setName] = useState('');
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
@@ -32,15 +32,16 @@ export default function RegisterUser({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [avatar, setAvatar] = useState('');
-  const [role, setRole] = useState('65e8a993a054b13412e618ee');
+  const role = props.route.params?.role || '665d81d41f0347d0b515e484';
   const [selectedImageName, setSelectedImageName] = useState("")
 
   const [isLoading, setIsLoading] = useState(false); // Introducing isLoading state
 
 
   async function PostData(props) {
+
     setIsLoading(true)
-    if (name && userName && email && cnic && cell1 && address && password && confirmPassword && avatar) {
+    if (name && userName && email && cnic && cell1 && address && avatar) {
       if (password === confirmPassword) {
         if (password.trim() !== "") {
           const apiEndpoint = Ip + '/user/postuser';
@@ -54,7 +55,6 @@ export default function RegisterUser({ navigation }) {
             formData.append('cell2', cell2);
             formData.append('address', address);
             formData.append('password', password);
-            formData.append('confirmPassword', confirmPassword);
             formData.append('avatar', avatar);
             formData.append('role', role);
 
@@ -67,7 +67,7 @@ export default function RegisterUser({ navigation }) {
             console.log('Response:', response.data);
             navigation.replace('OtpVerify', { name, email, userName });
           } catch (error) {
-            console.log(error.response.data.message || error.response.data.error || error.response || error);
+            console.log(error?.response?.data?.message || error.response.data.error || error.response || error);
             ShowToast({
               type: 'error',
               text1: error.response.data.message || error.response.data.error || error.response || error,
@@ -233,7 +233,7 @@ export default function RegisterUser({ navigation }) {
             />
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputContainerLabel}>Enter Address</Text>
+            <Text style={styles.inputContainerLabel}>Select Image</Text>
             <View style={styles.imagePickerContainer}>
               <TouchableOpacity onPress={SelectImage}>
                 <Text style={styles.btnText}>Browse</Text>

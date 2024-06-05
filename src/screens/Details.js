@@ -4,15 +4,23 @@ import React, { useEffect, useState } from 'react';
 import socketServcies from '../utils/SocketService';
 import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
+import Ip from '../assets/Ip';
 
-export default function Details() {
-  // useEffect(() => {
-  //   socketServcies.on('mqttRes', msg => {
-  //     console.log('socket io response: ', msg);
-  //     isTrue = msg == 'true';
-  //     setValue(isTrue);
-  //   });
-  // }, []);
+export default function Details(props) {
+
+  const [dis, setDis] = useState(false)
+
+  async function AdminResponse(status) {
+    // setDis(true)
+    let data = JSON.stringify({
+      requestId: props.route.params.request._id,
+      adminId: props.route.params.admin,
+      status,
+    });
+    socketServcies.emit('WSAdminResponse', data);
+    props.navigation.navigate("Dashboard", props.route.params.dashboard)
+  }
+
 
   return (
     <LinearGradient
@@ -20,21 +28,12 @@ export default function Details() {
       colors={['#FEF5EC', '#E1FBFD', '#FEF5EC']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      locations={[0, 0.09, 1]}
-
-    >
-      {/* <Switch
-        style={styles.switch}
-        color="#2089dc"
-        value={value}
-        onValueChange={value => DoorHandler(value)}
-      /> */}
-
-      {/* #E9F4F3 */}
-
+      locations={[0, 0.09, 1]}>
       <View style={styles.imageContainer}>
-        <Image style={styles.personImage} source={require('../assets/images/person.png')} />
-
+        <Image
+          style={[styles.personImage]}
+          source={{ uri: `${Ip}/images/${props.route.params.request.user.avatar}` }}
+        />
       </View>
       <View style={styles.dataContainer}>
         <View style={styles.row1}>
@@ -42,17 +41,17 @@ export default function Details() {
             <Image style={[styles.btnIcon]} source={require('../assets/images/avatar.png')} />
           </View>
           <View style={styles.textContainer}>
-            <Text style={[styles.textContainerHeading]} > Name</Text>
-            <Text style={[styles.textContainerSubHeading]} > Details</Text>
+            <Text style={[styles.textContainerHeading]} >{props.route.params.request.user.name}</Text>
+            <Text style={[styles.textContainerSubHeading]} >{props.route.params.request.user.role.name}</Text>
           </View>
         </View>
 
         <View style={styles.row2}>
-          <TouchableOpacity style={[styles.btnContainer, { width: 80, height: 80, backgroundColor: "#666666" }]}>
+          <TouchableOpacity style={[styles.btnContainer, { width: 80, height: 80, backgroundColor: "#666666" }]} onPress={() => { AdminResponse("rejected") }} disabled={dis}>
             <Image style={[styles.btnIcon]} source={require('../assets/images/cross.png')} />
           </TouchableOpacity>
           <View style={styles.bigButtonContainer}>
-            <TouchableOpacity style={[styles.btnContainer, { width: 80, height: 80, }]}>
+            <TouchableOpacity style={[styles.btnContainer, { width: 80, height: 80, }]} onPress={() => { AdminResponse("accepted") }} disabled={dis}>
               <Image style={[styles.btnIcon]} source={require('../assets/images/tick.png')} />
             </TouchableOpacity>
             <Text style={[styles.textContainerHeading]} > Open</Text>

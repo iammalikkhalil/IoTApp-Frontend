@@ -48,7 +48,7 @@ export default function LoginUser(props) {
 
       setTimeout(() => {
         // Redirect or navigate to the dashboard
-        props.navigation.replace('Dashboard');
+        props.navigation.replace('Dashboard', responseData.data);
       }, 1500);
     } catch (error) {
       handleErrorResponse(error)
@@ -77,7 +77,7 @@ export default function LoginUser(props) {
       <Header headerText="Login User" />
       <View style={styles.container}>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputContainerLabel}>Enter Email</Text>
+          <Text style={styles.inputContainerLabel}>Enter username</Text>
           <TextInput
             style={styles.inputContainerInputFeild}
             placeholderTextColor="gray"

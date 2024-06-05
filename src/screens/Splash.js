@@ -11,8 +11,7 @@ export default Splash = ({ navigation }) => {
             value = await JSON.parse(value)
             console.log(value.role);
             if (value.role && (value.role == "65e8a993a054b13412e618ee" || value.role.name == 'ADMIN')) {
-                await AsyncStorage.setItem('user', "");
-                Navigator("Dashboard")
+                Navigator("Dashboard", value)
             } else {
                 Navigator("LoginUser")
             }
@@ -27,9 +26,9 @@ export default Splash = ({ navigation }) => {
     }, []);
 
 
-    function Navigator(screenName) {
+    function Navigator(screenName, value = "") {
         setTimeout(() => {
-            navigation.replace(`${screenName}`);
+            navigation.replace(`${screenName}`, value);
         }, 1500);
     }
     return (
